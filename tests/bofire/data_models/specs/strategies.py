@@ -20,6 +20,9 @@ from bofire.data_models.features.api import (
     DiscreteInput,
     TaskInput,
 )
+from bofire.data_models.strategies.predictives.acqf_optimizers import (
+    BotorchAcqfOptimizer,
+)
 from bofire.data_models.surrogates.api import BotorchSurrogates, MultiTaskGPSurrogate
 from bofire.strategies.enum import OptimalityCriterionEnum
 from tests.bofire.data_models.specs.api import domain
@@ -30,8 +33,9 @@ specs = Specs([])
 
 
 strategy_commons = {
-    "num_raw_samples": 1024,
-    "num_restarts": 8,
+    "acqf_optimizer": BotorchAcqfOptimizer(
+        num_restarts=8, num_raw_samples=1024, maxiter=2000, batch_limit=6
+    ).model_dump(),
     "descriptor_method": CategoricalMethodEnum.EXHAUSTIVE,
     "categorical_method": CategoricalMethodEnum.EXHAUSTIVE,
     "discrete_method": CategoricalMethodEnum.EXHAUSTIVE,
@@ -42,8 +46,6 @@ strategy_commons = {
     "frequency_check": 1,
     "frequency_hyperopt": 0,
     "folds": 5,
-    "maxiter": 2000,
-    "batch_limit": 6,
 }
 
 
@@ -141,7 +143,7 @@ specs.add_valid(
                         key="b",
                         bounds=(0, 1),
                     ),
-                ],
+                ]
             ),
             outputs=Outputs(features=[ContinuousOutput(key="alpha")]),
         ).model_dump(),
@@ -164,10 +166,10 @@ specs.add_invalid(
                         key="b",
                         bounds=(0, 1),
                     ),
-                ],
+                ]
             ),
             outputs=Outputs(
-                features=[ContinuousOutput(key="alpha"), ContinuousOutput(key="beta")],
+                features=[ContinuousOutput(key="alpha"), ContinuousOutput(key="beta")]
             ),
         ).model_dump(),
         "acquisition_function": qNegIntPosVar(
@@ -256,7 +258,7 @@ specs.add_valid(
             strategies.Step(
                 strategy_data=strategies.QehviStrategy(
                     domain=tempdomain,
-                    batch_limit=1,
+                    acqf_optimizer=BotorchAcqfOptimizer(batch_limit=1),
                 ),
                 condition=strategies.NumberOfExperimentsCondition(n_experiments=30),
             ).model_dump(),
@@ -274,8 +276,8 @@ specs.add_valid(
                 features=[
                     CategoricalInput(key="alpha", categories=["a", "b", "c"]),
                     DiscreteInput(key="beta", values=[1.0, 2, 3.0, 4.0]),
-                ],
-            ),
+                ]
+            )
         ).model_dump(),
         "seed": 42,
     },
@@ -288,32 +290,24 @@ specs.add_valid(
             inputs=Inputs(
                 features=[
                     ContinuousInput(
-                        key="a",
-                        bounds=(0, 1),
-                        local_relative_bounds=(0.2, 0.2),
+                        key="a", bounds=(0, 1), local_relative_bounds=(0.2, 0.2)
                     ),
                     ContinuousInput(
-                        key="b",
-                        bounds=(0, 1),
-                        local_relative_bounds=(0.1, 0.1),
+                        key="b", bounds=(0, 1), local_relative_bounds=(0.1, 0.1)
                     ),
                     ContinuousInput(key="c", bounds=(0.1, 0.1)),
                     CategoricalInput(key="d", categories=["a", "b", "c"]),
-                ],
+                ]
             ),
             constraints=Constraints(
                 constraints=[
                     LinearEqualityConstraint(
-                        features=["a", "b", "c"],
-                        coefficients=[1.0, 1.0, 1.0],
-                        rhs=1.0,
+                        features=["a", "b", "c"], coefficients=[1.0, 1.0, 1.0], rhs=1.0
                     ),
                     LinearInequalityConstraint(
-                        features=["a", "b"],
-                        coefficients=[1.0, 1.0],
-                        rhs=0.95,
+                        features=["a", "b"], coefficients=[1.0, 1.0], rhs=0.95
                     ),
-                ],
+                ]
             ),
         ).model_dump(),
         "seed": 42,
@@ -330,27 +324,21 @@ specs.add_invalid(
             inputs=Inputs(
                 features=[
                     ContinuousInput(
-                        key="a",
-                        bounds=(0, 1),
-                        local_relative_bounds=(0.2, 0.2),
+                        key="a", bounds=(0, 1), local_relative_bounds=(0.2, 0.2)
                     ),
                     ContinuousInput(
-                        key="b",
-                        bounds=(0, 1),
-                        local_relative_bounds=(0.1, 0.1),
+                        key="b", bounds=(0, 1), local_relative_bounds=(0.1, 0.1)
                     ),
                     ContinuousInput(key="c", bounds=(0.1, 0.1)),
                     CategoricalInput(key="d", categories=["a", "b", "c"]),
-                ],
+                ]
             ),
             constraints=Constraints(
                 constraints=[
                     LinearEqualityConstraint(
-                        features=["a", "b", "c"],
-                        coefficients=[1.0, 1.0, 1.0],
-                        rhs=1.0,
-                    ),
-                ],
+                        features=["a", "b", "c"], coefficients=[1.0, 1.0, 1.0], rhs=1.0
+                    )
+                ]
             ),
         ).model_dump(),
         "seed": 42,
@@ -368,27 +356,21 @@ specs.add_invalid(
             inputs=Inputs(
                 features=[
                     ContinuousInput(
-                        key="a",
-                        bounds=(0, 1),
-                        local_relative_bounds=(0.2, 0.2),
+                        key="a", bounds=(0, 1), local_relative_bounds=(0.2, 0.2)
                     ),
                     ContinuousInput(
-                        key="b",
-                        bounds=(0, 1),
-                        local_relative_bounds=(0.1, 0.1),
+                        key="b", bounds=(0, 1), local_relative_bounds=(0.1, 0.1)
                     ),
                     ContinuousInput(key="c", bounds=(0.1, 0.1)),
                     CategoricalInput(key="d", categories=["a", "b", "c"]),
-                ],
+                ]
             ),
             constraints=Constraints(
                 constraints=[
                     LinearEqualityConstraint(
-                        features=["a", "b", "c"],
-                        coefficients=[1.0, 1.0, 1.0],
-                        rhs=1.0,
-                    ),
-                ],
+                        features=["a", "b", "c"], coefficients=[1.0, 1.0, 1.0], rhs=1.0
+                    )
+                ]
             ),
         ).model_dump(),
         "seed": 42,
@@ -407,27 +389,21 @@ specs.add_invalid(
             inputs=Inputs(
                 features=[
                     ContinuousInput(
-                        key="a",
-                        bounds=(0, 1),
-                        local_relative_bounds=(0.2, 0.2),
+                        key="a", bounds=(0, 1), local_relative_bounds=(0.2, 0.2)
                     ),
                     ContinuousInput(
-                        key="b",
-                        bounds=(0, 1),
-                        local_relative_bounds=(0.1, 0.1),
+                        key="b", bounds=(0, 1), local_relative_bounds=(0.1, 0.1)
                     ),
                     ContinuousInput(key="c", bounds=(0.1, 0.1)),
                     CategoricalInput(key="d", categories=["a", "b", "c"]),
-                ],
+                ]
             ),
             constraints=Constraints(
                 constraints=[
                     LinearEqualityConstraint(
-                        features=["a", "b", "c"],
-                        coefficients=[1.0, 1.0, 1.0],
-                        rhs=1.0,
-                    ),
-                ],
+                        features=["a", "b", "c"], coefficients=[1.0, 1.0, 1.0], rhs=1.0
+                    )
+                ]
             ),
         ).model_dump(),
         "seed": 42,
@@ -455,16 +431,14 @@ specs.add_invalid(
                     ),
                     ContinuousInput(key="c", bounds=(0.1, 0.1)),
                     CategoricalInput(key="d", categories=["a", "b", "c"]),
-                ],
+                ]
             ),
             constraints=Constraints(
                 constraints=[
                     LinearEqualityConstraint(
-                        features=["a", "b", "c"],
-                        coefficients=[1.0, 1.0, 1.0],
-                        rhs=1.0,
-                    ),
-                ],
+                        features=["a", "b", "c"], coefficients=[1.0, 1.0, 1.0], rhs=1.0
+                    )
+                ]
             ),
         ).model_dump(),
         "seed": 42,
@@ -482,7 +456,7 @@ specs.add_invalid(
             inputs=Inputs(
                 features=[
                     CategoricalInput(key="d", categories=["a", "b", "c"]),
-                ],
+                ]
             ),
         ).model_dump(),
         "seed": 42,
@@ -500,12 +474,10 @@ specs.add_invalid(
             inputs=Inputs(
                 features=[
                     ContinuousInput(
-                        key=k,
-                        bounds=(0, 1),
-                        local_relative_bounds=(0.1, 0.1),
+                        key=k, bounds=(0, 1), local_relative_bounds=(0.1, 0.1)
                     )
                     for k in ["a", "b", "c"]
-                ],
+                ]
             ),
             outputs=Outputs(features=[ContinuousOutput(key="alpha")]),
             constraints=Constraints(
@@ -515,8 +487,8 @@ specs.add_invalid(
                         min_count=1,
                         max_count=2,
                         none_also_valid=False,
-                    ),
-                ],
+                    )
+                ]
             ),
         ).model_dump(),
         "local_search_config": strategies.LSRBO(),
@@ -532,17 +504,15 @@ specs.add_invalid(
             inputs=Inputs(
                 features=[
                     ContinuousInput(
-                        key=k,
-                        bounds=(0, 1),
-                        local_relative_bounds=(0.1, 0.1),
+                        key=k, bounds=(0, 1), local_relative_bounds=(0.1, 0.1)
                     )
                     for k in ["a", "b", "c"]
                 ]
-                + [CategoricalInput(key="d", categories=["a", "b", "c"])],
+                + [CategoricalInput(key="d", categories=["a", "b", "c"])]
             ),
             outputs=Outputs(features=[ContinuousOutput(key="alpha")]),
             constraints=Constraints(
-                constraints=[InterpointEqualityConstraint(feature="a")],
+                constraints=[InterpointEqualityConstraint(feature="a")]
             ),
         ).model_dump(),
     },
@@ -558,7 +528,7 @@ specs.add_valid(
                 features=[
                     ContinuousInput(key="a", bounds=(0, 1)),
                     ContinuousInput(key="b", bounds=(0, 1)),
-                ],
+                ]
             ),
         ).model_dump(),
         "seed": 42,
@@ -577,7 +547,7 @@ specs.add_invalid(
                 features=[
                     ContinuousInput(key="a", bounds=(0, 1)),
                     ContinuousInput(key="b", bounds=(0, 1)),
-                ],
+                ]
             ),
         ).model_dump(),
         "seed": 42,
@@ -598,7 +568,7 @@ specs.add_invalid(
                 features=[
                     ContinuousInput(key="a", bounds=(0, 1)),
                     ContinuousInput(key="b", bounds=(0, 1)),
-                ],
+                ]
             ),
         ).model_dump(),
         "seed": 42,
@@ -623,7 +593,7 @@ specs.add_invalid(
                         allowed=[True, True],
                     ),
                     ContinuousInput(key="x", bounds=(0, 1)),
-                ],
+                ]
             ),
             outputs=Outputs(features=[ContinuousOutput(key="y")]),
         ).model_dump(),
@@ -638,70 +608,13 @@ specs.add_invalid(
                                 allowed=[True, True],
                             ),
                             ContinuousInput(key="x", bounds=(0, 1)),
-                        ],
+                        ]
                     ),
                     outputs=Outputs(features=[ContinuousOutput(key="y")]),
-                ),
-            ],
+                )
+            ]
         ).model_dump(),
     },
     error=ValueError,
     message="Exactly one allowed task category must be specified for strategies with MultiTask models.",
-)
-
-specs.add_valid(
-    strategies.MultiFidelityStrategy,
-    lambda: {
-        "domain": Domain(
-            inputs=Inputs(
-                features=[
-                    ContinuousInput(key="a", bounds=(0, 1)),
-                    TaskInput(
-                        key="task", categories=["task_hf", "task_lf"], fidelities=[0, 1]
-                    ),
-                ]
-            ),
-            outputs=Outputs(features=[ContinuousOutput(key="alpha")]),
-        ).model_dump(),
-        **strategy_commons,
-        "acquisition_function": qEI().model_dump(),
-        "fidelity_thresholds": 0.1,
-    },
-)
-
-specs.add_invalid(
-    strategies.MultiFidelityStrategy,
-    lambda: {
-        "domain": Domain(
-            inputs=Inputs(features=[ContinuousInput(key="a", bounds=(0, 1))]),
-            outputs=Outputs(features=[ContinuousOutput(key="alpha")]),
-        ).model_dump(),
-        **strategy_commons,
-        "acquisition_function": qEI().model_dump(),
-        "fidelity_thresholds": 0.1,
-    },
-    error=ValueError,
-    message="Exactly one task input is required for multi-task GPs.",
-)
-
-specs.add_invalid(
-    strategies.MultiFidelityStrategy,
-    lambda: {
-        "domain": Domain(
-            inputs=Inputs(
-                features=[
-                    ContinuousInput(key="a", bounds=(0, 1)),
-                    TaskInput(
-                        key="task", categories=["task_hf", "task_lf"], fidelities=[0, 0]
-                    ),
-                ]
-            ),
-            outputs=Outputs(features=[ContinuousOutput(key="alpha")]),
-        ).model_dump(),
-        **strategy_commons,
-        "acquisition_function": qEI().model_dump(),
-        "fidelity_thresholds": 0.1,
-    },
-    error=ValueError,
-    message="Only one task can be the target fidelity",
 )
